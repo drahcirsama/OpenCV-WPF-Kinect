@@ -13,20 +13,28 @@ namespace KinectWPFOpenCV
 {
     public static class ImageHelpers
     {
-       
+        
+               
         private const int MaxDepthDistance = 4000;
         private const int MinDepthDistance = 850;
         private const int MaxDepthDistanceOffset = 3150;
-
-        public static BitmapSource SliceDepthImage(this DepthImageFrame image, int min = 20, int max = 1000)
+        
+        public static BitmapSource SliceDepthImage(this DepthFrame image, int min = 20, int max = 1000)
         {
-            int width = image.Width;
-            int height = image.Height;
+  
+            var tmFrameDescription = image.FrameDescription;
+
+            int width = tmFrameDescription.Width; //image.Width;
+            int height = tmFrameDescription.Height; // image.Height;
 
             //var depthFrame = image.Image.Bits;
-            short[] rawDepthData = new short[image.PixelDataLength];
-            image.CopyPixelDataTo(rawDepthData);
-           
+            //short[] rawDepthData = new short[tmFrameDescription.LengthInPixels]; //new short[image.PixelDataLength];
+            ushort[] rawDepthData = new ushort[tmFrameDescription.LengthInPixels];
+            
+            //image.CopyPixelDataTo(rawDepthData);
+            image.CopyFrameDataToArray(rawDepthData);
+
+
             var pixels = new byte[height * width * 4];
           
             const int BlueIndex = 0;
@@ -39,8 +47,9 @@ namespace KinectWPFOpenCV
             {
 
                 // Calculate the distance represented by the two depth bytes
-                int depth = rawDepthData[depthIndex] >> DepthImageFrame.PlayerIndexBitmaskWidth;
-
+                //int depth = rawDepthData[depthIndex] >> DepthImageFrame.PlayerIndexBitmaskWidth;          
+                //int depth = rawDepthData[depthIndex] >> image.DepthMinReliableDistance;
+                int depth = rawDepthData[depthIndex];
                 // Map the distance to an intesity that can be represented in RGB
                 var intensity = CalculateIntensityFromDistance(depth);
 
